@@ -1,6 +1,6 @@
 import sys,os
 text_list=[]
-if len(sys.argv) == 2:
+if len(sys.argv) == 2:                                         #.\COHDCN181F-012-Assignment-01.py filename.txt
         if os.path.isfile(sys.argv[1]):
             
             f =open(str(sys.argv[1]),'r')
