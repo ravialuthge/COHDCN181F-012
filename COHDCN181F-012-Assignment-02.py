@@ -3,7 +3,7 @@ import sys,os
 import argparse
 from threading import Thread 
 
-p=argparse.ArgumentParser()                              #.\COHDCN181F-012-Assignment-01.py -l 127.0.0.1 8000
+p=argparse.ArgumentParser()                              #.\COHDCN181F-012-Assignment-02.py -l 127.0.0.1 8000
 p.add_argument("serverip",nargs='?',type=str)            
 p.add_argument("-l","--ip",type=str)   
 p.add_argument("port",type=int)
