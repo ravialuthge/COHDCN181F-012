@@ -4,7 +4,7 @@ from threading import Thread
                    
                                                                          #.\COHDCN181F-012-Assignment-02.py -l 127.0.0.1 8000
 
-def server():
+def ser_Architecture():
 	if len(sys.argv) == 4:
           if sys.argv[1] == "-l":
     
@@ -20,7 +20,7 @@ def server():
             server_socket.listen()
             con , addr=server_socket.accept()
             
-            t2=Thread(target=msg , args=(con,))
+            t2=Thread(target= massage , args=(con,))
             t2.start()
             
             while True:
@@ -37,7 +37,7 @@ def server():
 	
 
 
-def client():
+def cli_Architecture():
 	if len(sys.argv) == 3:
    
             client_socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -48,7 +48,7 @@ def client():
             except socket.error:
                 print("invalid")
 
-            t1=Thread(target=msg , args=(client_socket,))
+            t1=Thread(target= massage , args=(client_socket,))
             t1.start()
 
             while True:
@@ -67,7 +67,7 @@ def client():
 
               
                     
-def msg(con):     
+def massage(con):     
 
  try:
     while True:
@@ -78,5 +78,5 @@ def msg(con):
             
             sys.exit()
     
-server()
-client()
+ser_Architecture()
+cli_Architecture()
