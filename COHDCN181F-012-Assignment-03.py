@@ -1,0 +1,110 @@
+import socket
+import argparse
+import struct
+import time
+from ctypes import *
+import sys
+
+
+
+class ipv4_header_str(Structure):
+
+    _fields_ = [
+        ("version", c_ubyte, 4),     #u_byte = 1byte represent 4bit
+        ("ihl", c_ubyte, 4),
+        ("tos", c_ubyte),        #bit 8 
+        ("len", c_ushort),         #bit 16
+        ("id", c_ushort),
+        ("offset", c_ushort),
+        ("ttl", c_ubyte),
+        ("proto", c_ubyte),
+        ("checksum", c_ushort),
+        ("src", c_uint32),        #bit 32 
+        ("dst", c_uint32),
+    ]
+
+    def __new__(self, socket_buffer=None):
+        return self.from_buffer_copy(socket_buffer)
+
+    def __init__(self, socket_buffer=None):
+
+        self.TTL = str(self.ttl)
+
+         #human readable IP address
+
+        self.src_address = socket.inet_ntoa(struct.pack("@I", self.src))
+        self.dst_address = socket.inet_ntoa(struct.pack("@I", self.dst))
+
+
+class ipv4_packet():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('ip')
+    args = parser.parse_args()
+
+    dst = args.ip
+    src = socket.gethostbyname(socket.getfqdn())    #get ip address in eth
+    ip_vhl = 5
+    ip_ver = 4
+    ip_vers = (ip_ver << 4) + ip_vhl
+
+    ip_dsc = 0
+    ip_ecn = 0
+    ip_tos = (ip_dsc << 2) + ip_ecn
+
+    ip_tol = 0
+
+    ip_idf = 54321
+
+    ip_rsv = 0
+    ip_dtf = 0
+    ip_mrf = 0
+    ip_frag_offset = 0
+
+    ip_flg = (ip_rsv << 7) + (ip_dtf << 6) + (ip_mrf << 5) + ip_frag_offset
+
+    ip_ttl = 64
+
+    ip_proto = 1
+
+    ip_chk = 0
+
+    ip_saddr = socket.inet_aton(src)
+
+    ip_daddr = socket.inet_aton(socket.gethostbyname(dst))   #convert ip dotted-quad to 32bit
+
+    #B = bit 8 H = bit 16 4s = bit 32
+
+    ip_header = struct.pack('!B B H H H B B H 4s 4s',
+                            ip_vers, ip_tos, ip_tol, ip_idf, ip_flg, ip_ttl, ip_proto, ip_chk, ip_saddr, ip_daddr)
+
+    icmp_type = 8
+    code = 0
+    checksum = 0xf7ff
+    identifier = 0
+    sq_no = 0
+
+    icmp_pack = struct.pack('!B B H H H', icmp_type, code, checksum, identifier, sq_no)
+
+    pac = (ip_header + icmp_pack)
+
+ipp = ipv4_packet()
+
+
+
+try:
+
+    send_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
+    send_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    send_socket.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+    recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
+
+except:
+    print('error')
+
+for i in range(1, 5):
+    time.sleep(1)
+    send_socket.sendto(ipp.pac, (ipp.dst, 0))
+    data = recv_socket.recv(1024)
+    ip_print = ipv4_header_str(data)
+    print("64 bytes from " + ip_print.src_address + ": " +  "icmp_seq=" + str(i) +" " "ttl=" + ip_print.TTL)
